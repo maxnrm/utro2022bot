@@ -13,7 +13,6 @@ import (
 
 func main() {
 
-	// var DatabaseURL string = os.Getenv("DATABASE_URL")
 	var Token string = os.Getenv("TELEGRAM_BOT_KEY")
 
 	var timetableWrapper tt.Wrapper

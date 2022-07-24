@@ -4,28 +4,51 @@ import (
 	"fmt"
 	"log"
 
+	"github.com/maxnrm/utro2022bot/db"
 	tt "github.com/maxnrm/utro2022bot/timetable"
 	tele "gopkg.in/telebot.v3"
 )
 
-func miniLogger() tele.MiddlewareFunc {
-	l := log.Default()
-
-	return func(next tele.HandlerFunc) tele.HandlerFunc {
-		return func(c tele.Context) error {
-			update := c.Update()
-			messageID := update.Message.ID
-			// data, _ := json.MarshalIndent(update, "", "  ")
-			l.Println(messageID, "ok")
-			return next(c)
-		}
-	}
+type name struct {
+	full  string
+	short string
 }
+
+const (
+	uralEco    = "Урал.Эко-сообщества"
+	uralUrb    = "Урал.Урбанистические сообщества"
+	uralCreate = "Урал.Креативные сообщества"
+	uralInvolv = "Урал.Вовлеченные сообщества"
+	uralEdu    = "Урал.Образовательные сообщества"
+	uralHealth = "Урал.ЗОЖ-сообщества"
+)
+
+var (
+	btnEco    = tele.InlineButton{Text: uralEco, Unique: "seturaleco"}
+	btnUrb    = tele.InlineButton{Text: uralUrb, Unique: "seturalurb"}
+	btnCreate = tele.InlineButton{Text: uralCreate, Unique: "seturalcreate"}
+	btnInvolv = tele.InlineButton{Text: uralInvolv, Unique: "seturalinvolv"}
+	btnEdu    = tele.InlineButton{Text: uralEdu, Unique: "seturaledu"}
+	btnHealth = tele.InlineButton{Text: uralHealth, Unique: "seturalhealth"}
+
+	setProgramInlineBtns = [][]tele.InlineButton{
+		{btnEco},
+		{btnUrb},
+		{btnCreate},
+		{btnInvolv},
+		{btnEdu},
+		{btnHealth},
+	}
+	setProgramInlineMarkup = &tele.ReplyMarkup{InlineKeyboard: setProgramInlineBtns}
+)
 
 // AddHandlers creates telegram bot
 func AddHandlers(timetableWrapper *tt.Wrapper) func(*tele.Bot) *tele.Bot {
+
+	dbHandler := db.New()
+
 	return func(b *tele.Bot) *tele.Bot {
-		b.Use(miniLogger())
+		// b.Use(miniLogger())
 
 		b.Handle("/timetable", func(c tele.Context) error {
 			resp := ""
@@ -37,6 +60,45 @@ func AddHandlers(timetableWrapper *tt.Wrapper) func(*tele.Bot) *tele.Bot {
 
 		})
 
+		b.Handle("/setprogram", func(c tele.Context) error {
+			return c.Send("Hello!", setProgramInlineMarkup)
+		})
+
+		b.Handle(&btnEco, createSetProgramHandler(&btnEco, &dbHandler))
+		b.Handle(&btnUrb, createSetProgramHandler(&btnUrb, &dbHandler))
+		b.Handle(&btnCreate, createSetProgramHandler(&btnCreate, &dbHandler))
+		b.Handle(&btnInvolv, createSetProgramHandler(&btnInvolv, &dbHandler))
+		b.Handle(&btnEdu, createSetProgramHandler(&btnEdu, &dbHandler))
+		b.Handle(&btnHealth, createSetProgramHandler(&btnHealth, &dbHandler))
+
 		return b
+	}
+}
+
+func createSetProgramHandler(btn *tele.InlineButton, dbHandler *db.Handler) tele.HandlerFunc {
+	return func(c tele.Context) error {
+		var user db.User
+
+		user.ID = c.Chat().ID
+		user.Group = btn.Unique
+
+		dbHandler.AddUser(&user, []string{"group"})
+
+		c.Send("Ты выбрал программу " + btn.Text + ". Теперь ты будешь получать расписание для этой программы.")
+
+		return c.Delete()
+	}
+}
+
+func miniLogger() tele.MiddlewareFunc {
+	l := log.Default()
+
+	return func(next tele.HandlerFunc) tele.HandlerFunc {
+		return func(c tele.Context) error {
+			update := c.Update()
+			messageID := update.Message.ID
+			l.Println(messageID, "ok")
+			return next(c)
+		}
 	}
 }
