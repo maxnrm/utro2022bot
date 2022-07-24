@@ -8,60 +8,59 @@ import (
 	"time"
 
 	"github.com/gin-gonic/gin"
+	tt "github.com/maxnrm/utro2022bot/timetable"
 	tele "gopkg.in/telebot.v3"
 )
 
-// Event is timetable event
-type Event struct {
-	Hidden       string `json:"Скрыть"`
-	Order        string `json:"Иерархия"`
-	Participants string `json:"Учавствуют"`
-	Time         string `json:"Время"`
-	Name         string `json:"Название"`
-	Description  string `json:"Описание"`
-	Place        string `json:"Место"`
+func ping(c *gin.Context) {
+	c.JSON(http.StatusOK, gin.H{
+		"message": "pong",
+	})
 }
 
-// Timetable is timetable
-type Timetable struct {
-	Name   string  `json:"name"`
-	Events []Event `json:"rowObjects"`
+func timetableHandler(timetable *tt.Wrapper) gin.HandlerFunc {
+	return func(c *gin.Context) {
+		if c.BindJSON(&timetable) == nil {
+			resp := ""
+			for _, v := range timetable.Timetable[0].Events {
+				resp += fmt.Sprintf("%s %s %s %s\n", v.Time, v.Name, v.Description, v.Place)
+			}
+			c.String(http.StatusOK, resp)
+		}
+	}
 }
 
-// TimetableWrapper is you know
-type TimetableWrapper struct {
-	Timetable []Timetable `json:"timetable"`
+func miniLogger() tele.MiddlewareFunc {
+	l := log.Default()
+
+	return func(next tele.HandlerFunc) tele.HandlerFunc {
+		return func(c tele.Context) error {
+			update := c.Update()
+			messageID := update.Message.ID
+			// data, _ := json.MarshalIndent(update, "", "  ")
+			l.Println(messageID, "ok")
+			return next(c)
+		}
+	}
 }
 
 func main() {
-	var timetable TimetableWrapper
-	var tt string
 
-	go func() {
-		r := gin.Default()
+	var timetableWrapper tt.Wrapper
 
-		r.POST("/timetable", func(c *gin.Context) {
-			if c.BindJSON(&timetable) == nil {
-				tt = ""
-				for _, v := range timetable.Timetable[0].Events {
-					tt += fmt.Sprintf("%s %s %s %s\n", v.Time, v.Name, v.Description, v.Place)
-				}
-				c.String(http.StatusOK, tt)
-			}
-		})
+	var Token string = os.Getenv("TELEGRAM_BOT_KEY")
+	// var DatabaseURL string = os.Getenv("DATABASE_URL")
 
-		r.GET("/ping", func(c *gin.Context) {
-			c.JSON(http.StatusOK, gin.H{
-				"message": "pong",
-			})
-		})
+	r := gin.Default()
 
-		r.Run() // listen and serve on 0.0.0.0:8080 (for windows "localhost:8080")
+	r.POST("/timetable", timetableHandler(&timetableWrapper))
 
-	}()
+	r.GET("/ping", ping)
+
+	go r.Run() // listen and serve on 0.0.0.0:8080 (for windows "localhost:8080")
 
 	pref := tele.Settings{
-		Token:  os.Getenv("TOKEN"),
+		Token:  Token,
 		Poller: &tele.LongPoller{Timeout: 10 * time.Second},
 	}
 
@@ -71,12 +70,18 @@ func main() {
 		return
 	}
 
-	// b.Use(middleware.Logger())
+	b.Use(miniLogger())
 
 	b.Handle("/timetable", func(c tele.Context) error {
-		return c.Send(tt)
+		resp := ""
+		for _, v := range timetableWrapper.Timetable[0].Events {
+			resp += fmt.Sprintf("%s %s %s %s\n", v.Time, v.Name, v.Description, v.Place)
+		}
+
+		return c.Send(resp)
 		// return c.Send("timetable")
 	})
+
 	println("Bot started")
 	b.Start()
 }
