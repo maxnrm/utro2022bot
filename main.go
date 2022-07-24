@@ -3,32 +3,14 @@ package main
 import (
 	"fmt"
 	"log"
-	"net/http"
 	"os"
 	"time"
 
 	"github.com/gin-gonic/gin"
 	tt "github.com/maxnrm/utro2022bot/timetable"
+	ws "github.com/maxnrm/utro2022bot/webserver"
 	tele "gopkg.in/telebot.v3"
 )
-
-func ping(c *gin.Context) {
-	c.JSON(http.StatusOK, gin.H{
-		"message": "pong",
-	})
-}
-
-func timetableHandler(timetable *tt.Wrapper) gin.HandlerFunc {
-	return func(c *gin.Context) {
-		if c.BindJSON(&timetable) == nil {
-			resp := ""
-			for _, v := range timetable.Timetable[0].Events {
-				resp += fmt.Sprintf("%s %s %s %s\n", v.Time, v.Name, v.Description, v.Place)
-			}
-			c.String(http.StatusOK, resp)
-		}
-	}
-}
 
 func miniLogger() tele.MiddlewareFunc {
 	l := log.Default()
@@ -46,18 +28,15 @@ func miniLogger() tele.MiddlewareFunc {
 
 func main() {
 
-	var timetableWrapper tt.Wrapper
-
 	var Token string = os.Getenv("TELEGRAM_BOT_KEY")
 	// var DatabaseURL string = os.Getenv("DATABASE_URL")
 
+	var timetableWrapper tt.Wrapper
+
 	r := gin.Default()
-
-	r.POST("/timetable", timetableHandler(&timetableWrapper))
-
-	r.GET("/ping", ping)
-
-	go r.Run() // listen and serve on 0.0.0.0:8080 (for windows "localhost:8080")
+	Routes := ws.CreateRoutes(&timetableWrapper)
+	Routes(r)
+	go r.Run()
 
 	pref := tele.Settings{
 		Token:  Token,
