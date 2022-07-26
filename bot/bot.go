@@ -39,25 +39,6 @@ var (
 	}
 )
 
-func createTimetableHandler(timetableWrapper *tt.Wrapper) tele.HandlerFunc {
-	return func(c tele.Context) error {
-		resp := ""
-		for _, v := range timetableWrapper.Timetable[0].Events {
-			resp += fmt.Sprintf("%s %s %s %s\n", v.Time, v.Name, v.Description, v.Place)
-		}
-
-		userID := c.Chat().ID
-
-		user := dbHandler.GetUser(userID)
-
-		msg := fmt.Sprintf("%v1", user.Group)
-
-		c.Send(msg)
-
-		return c.Send(resp)
-	}
-}
-
 // AddHandlers creates telegram bot
 func AddHandlers(timetableWrapper *tt.Wrapper) func(*tele.Bot) *tele.Bot {
 
@@ -80,6 +61,24 @@ func AddHandlers(timetableWrapper *tt.Wrapper) func(*tele.Bot) *tele.Bot {
 		b.Handle(&btnHealth, createSetProgramVariantHandler(&btnHealth, &dbHandler))
 
 		return b
+	}
+}
+
+func createTimetableHandler(timetableWrapper *tt.Wrapper) tele.HandlerFunc {
+	return func(c tele.Context) error {
+		resp := ""
+		for _, v := range timetableWrapper.Timetable[0].Events {
+			resp += fmt.Sprintf("%s %s %s %s\n", v.Time, v.Name, v.Description, v.Place)
+		}
+
+		userID := c.Chat().ID
+
+		user := dbHandler.GetUser(userID)
+		if user.ID == 0 {
+			return setProgramHandler(c)
+		}
+
+		return c.Send(resp)
 	}
 }
 

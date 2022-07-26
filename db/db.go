@@ -55,7 +55,7 @@ func (h Handler) GetUser(tgUserID int64) User {
 
 	var user User
 	if result := h.DB.First(&user, tgUserID); result.Error != nil {
-		fmt.Println(result.Error)
+		fmt.Printf("User with id %v not found\n", tgUserID)
 	}
 
 	return user
