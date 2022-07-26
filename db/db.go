@@ -4,7 +4,6 @@ import (
 	"fmt"
 	"log"
 	"os"
-	"strconv"
 
 	"gorm.io/driver/postgres"
 	"gorm.io/gorm"
@@ -52,13 +51,12 @@ func (h Handler) AddUser(user *User, columns []string) {
 }
 
 // GetUser adds user
-func (h Handler) GetUser(tgUserID string) {
-	id, _ := strconv.Atoi(tgUserID)
+func (h Handler) GetUser(tgUserID int64) User {
 
 	var user User
-	if result := h.DB.First(&user, id); result.Error != nil {
+	if result := h.DB.First(&user, tgUserID); result.Error != nil {
 		fmt.Println(result.Error)
 	}
 
-	return
+	return user
 }

@@ -48,7 +48,8 @@ func AddHandlers(timetableWrapper *tt.Wrapper) func(*tele.Bot) *tele.Bot {
 	dbHandler := db.New()
 
 	return func(b *tele.Bot) *tele.Bot {
-		// b.Use(miniLogger())
+		b.Use(miniLogger())
+		// b.Use(checkUserSubscribed(&dbHandler))
 
 		b.Handle("/timetable", func(c tele.Context) error {
 			resp := ""
@@ -90,13 +91,42 @@ func createSetProgramHandler(btn *tele.InlineButton, dbHandler *db.Handler) tele
 	}
 }
 
+// func checkUserSubscribed(dbHandler *db.Handler) tele.MiddlewareFunc {
+
+// 	return func(next tele.HandlerFunc) tele.HandlerFunc {
+// 		return func(c tele.Context) error {
+
+// 			// user = dbHandler.GetUser(userID)
+
+// 			var importantChannelID int64 = os.GetEnv("IMPORTANT_CHANNEL_ID")
+// 			importantChannel, err := c.Bot().ChatByID(importantChannelID)
+// 			user, err := c.Bot().ChatMemberOf(importantChannel, c.Chat())
+// 			if err != nil {
+// 				fmt.Println("Chat ID is not ok!")
+// 			}
+// 			fmt.Println(user.Anonymous)
+// 			channelLink := importantChannel.InviteLink
+
+// 			//return if user is joined chat
+// 			_, err = c.Bot().ChatMemberOf(importantChannel, c.Chat())
+// 			if err == nil {
+// 				return next(c)
+// 			}
+
+// 			c.Send("Кажется ты еще не подписан на наш канал с очень важными апдейтами! Держи ссылку" + channelLink)
+
+// 			return next(c)
+// 		}
+// 	}
+// }
+
 func miniLogger() tele.MiddlewareFunc {
 	l := log.Default()
 
 	return func(next tele.HandlerFunc) tele.HandlerFunc {
 		return func(c tele.Context) error {
 			update := c.Update()
-			messageID := update.Message.ID
+			messageID := update.ID
 			l.Println(messageID, "ok")
 			return next(c)
 		}
