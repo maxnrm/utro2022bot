@@ -9,11 +9,6 @@ import (
 	tele "gopkg.in/telebot.v3"
 )
 
-type name struct {
-	full  string
-	short string
-}
-
 const (
 	uralEco    = "Урал.Эко-сообщества"
 	uralUrb    = "Урал.Урбанистические сообщества"
@@ -24,6 +19,8 @@ const (
 )
 
 var (
+	dbHandler db.Handler = db.New()
+
 	btnEco    = tele.InlineButton{Text: uralEco, Unique: "seturaleco"}
 	btnUrb    = tele.InlineButton{Text: uralUrb, Unique: "seturalurb"}
 	btnCreate = tele.InlineButton{Text: uralCreate, Unique: "seturalcreate"}
@@ -31,7 +28,8 @@ var (
 	btnEdu    = tele.InlineButton{Text: uralEdu, Unique: "seturaledu"}
 	btnHealth = tele.InlineButton{Text: uralHealth, Unique: "seturalhealth"}
 
-	setProgramInlineBtns = [][]tele.InlineButton{
+	setProgramInlineMarkup = &tele.ReplyMarkup{InlineKeyboard: setProgramInlineBtns}
+	setProgramInlineBtns   = [][]tele.InlineButton{
 		{btnEco},
 		{btnUrb},
 		{btnCreate},
@@ -39,44 +37,76 @@ var (
 		{btnEdu},
 		{btnHealth},
 	}
-	setProgramInlineMarkup = &tele.ReplyMarkup{InlineKeyboard: setProgramInlineBtns}
 )
+
+func createTimetableHandler(timetableWrapper *tt.Wrapper) tele.HandlerFunc {
+	return func(c tele.Context) error {
+		resp := ""
+		for _, v := range timetableWrapper.Timetable[0].Events {
+			resp += fmt.Sprintf("%s %s %s %s\n", v.Time, v.Name, v.Description, v.Place)
+		}
+
+		userID := c.Chat().ID
+
+		user := dbHandler.GetUser(userID)
+
+		msg := fmt.Sprintf("%v1", user.Group)
+
+		c.Send(msg)
+
+		return c.Send(resp)
+	}
+}
 
 // AddHandlers creates telegram bot
 func AddHandlers(timetableWrapper *tt.Wrapper) func(*tele.Bot) *tele.Bot {
-
-	dbHandler := db.New()
 
 	return func(b *tele.Bot) *tele.Bot {
 		b.Use(miniLogger())
 		// b.Use(checkUserSubscribed(&dbHandler))
 
-		b.Handle("/timetable", func(c tele.Context) error {
-			resp := ""
-			for _, v := range timetableWrapper.Timetable[0].Events {
-				resp += fmt.Sprintf("%s %s %s %s\n", v.Time, v.Name, v.Description, v.Place)
-			}
+		b.Handle("/start", startHandler)
+		b.Handle("/help", helpHandler)
 
-			return c.Send(resp)
+		b.Handle("/timetable", createTimetableHandler(timetableWrapper))
 
-		})
-
-		b.Handle("/setprogram", func(c tele.Context) error {
-			return c.Send("Hello!", setProgramInlineMarkup)
-		})
-
-		b.Handle(&btnEco, createSetProgramHandler(&btnEco, &dbHandler))
-		b.Handle(&btnUrb, createSetProgramHandler(&btnUrb, &dbHandler))
-		b.Handle(&btnCreate, createSetProgramHandler(&btnCreate, &dbHandler))
-		b.Handle(&btnInvolv, createSetProgramHandler(&btnInvolv, &dbHandler))
-		b.Handle(&btnEdu, createSetProgramHandler(&btnEdu, &dbHandler))
-		b.Handle(&btnHealth, createSetProgramHandler(&btnHealth, &dbHandler))
+		// setprogram handlers
+		b.Handle("/setprogram", setProgramHandler)
+		b.Handle(&btnEco, createSetProgramVariantHandler(&btnEco, &dbHandler))
+		b.Handle(&btnUrb, createSetProgramVariantHandler(&btnUrb, &dbHandler))
+		b.Handle(&btnCreate, createSetProgramVariantHandler(&btnCreate, &dbHandler))
+		b.Handle(&btnInvolv, createSetProgramVariantHandler(&btnInvolv, &dbHandler))
+		b.Handle(&btnEdu, createSetProgramVariantHandler(&btnEdu, &dbHandler))
+		b.Handle(&btnHealth, createSetProgramVariantHandler(&btnHealth, &dbHandler))
 
 		return b
 	}
 }
 
-func createSetProgramHandler(btn *tele.InlineButton, dbHandler *db.Handler) tele.HandlerFunc {
+func startHandler(c tele.Context) error {
+	err := c.Send(`Привет! Я Ботутра, твой бот-помощник!
+Список команд:
+/timetable - Посмотреть расписание
+/setprogram - Выбрать программу
+/help - Список комманд
+`)
+	setProgramHandler(c)
+	return err
+}
+
+func helpHandler(c tele.Context) error {
+	return c.Send(`Список команд:
+/timetable - Посмотреть расписание
+/setprogram - Выбрать программу
+/help - Список комманд
+`)
+}
+
+func setProgramHandler(c tele.Context) error {
+	return c.Send("Выбери программу, расписание которой хочешь видеть в боте:", setProgramInlineMarkup)
+}
+
+func createSetProgramVariantHandler(btn *tele.InlineButton, dbHandler *db.Handler) tele.HandlerFunc {
 	return func(c tele.Context) error {
 		var user db.User
 
@@ -125,9 +155,8 @@ func miniLogger() tele.MiddlewareFunc {
 
 	return func(next tele.HandlerFunc) tele.HandlerFunc {
 		return func(c tele.Context) error {
-			update := c.Update()
-			messageID := update.ID
-			l.Println(messageID, "ok")
+			chatID := c.Chat().ID
+			l.Println(chatID, "ok")
 			return next(c)
 		}
 	}
