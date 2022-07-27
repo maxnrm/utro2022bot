@@ -1,10 +1,11 @@
 - [x] Google Sheet docs > JSON
 - [x] JSON > Schdule on telegram bot
+- [x] Some events shown only for specific group
+- [x] Register bot subs to db (SQLite?)
+- [x] Register sub group to db
 - [ ] Show timetable only for current date
-- [ ] Some events shown only for specific group
-- [ ] Register bot subs to db (SQLite?)
-- [ ] Register sub group to db
-
+- [ ] Group events by order
+- [ ] Send pics before timetable
 
 # Telegram bot API docs
 
