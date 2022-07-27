@@ -1,7 +1,6 @@
 package webserver
 
 import (
-	"fmt"
 	"net/http"
 
 	"github.com/gin-gonic/gin"
@@ -17,12 +16,9 @@ func ping(c *gin.Context) {
 func timetableHandler(timetable *tt.Wrapper) gin.HandlerFunc {
 	return func(c *gin.Context) {
 		if c.BindJSON(&timetable) == nil {
-			resp := ""
-			for _, v := range timetable.Timetable[0].Events {
-				resp += fmt.Sprintf("%s %s %s %s\n", v.Time, v.Name, v.Description, v.Place)
-			}
-			c.String(http.StatusOK, resp)
+			c.Status(http.StatusNoContent)
 		}
+		timetable.FormatSelf()
 	}
 }
 

@@ -1,7 +1,6 @@
 package bot
 
 import (
-	"fmt"
 	"log"
 
 	"github.com/maxnrm/utro2022bot/db"
@@ -64,11 +63,17 @@ func AddHandlers(timetableWrapper *tt.Wrapper) func(*tele.Bot) *tele.Bot {
 	}
 }
 
-func createTimetableHandler(timetableWrapper *tt.Wrapper) tele.HandlerFunc {
+func createTimetableHandler(ttw *tt.Wrapper) tele.HandlerFunc {
 	return func(c tele.Context) error {
-		resp := ""
-		for _, v := range timetableWrapper.Timetable[0].Events {
-			resp += fmt.Sprintf("%s %s %s %s\n", v.Time, v.Name, v.Description, v.Place)
+
+		currentTimetable := ttw.Timetables[0].Events
+		currentFormattedTimetable := ttw.FormattedTimeTables[0].FormattedEvents
+
+		var sendOptions tele.SendOptions
+		sendOptions.ParseMode = tele.ModeHTML
+
+		for i := range currentTimetable {
+			c.Send(currentFormattedTimetable[i], tele.ModeHTML)
 		}
 
 		userID := c.Chat().ID
@@ -78,7 +83,7 @@ func createTimetableHandler(timetableWrapper *tt.Wrapper) tele.HandlerFunc {
 			return setProgramHandler(c)
 		}
 
-		return c.Send(resp)
+		return c.Send("")
 	}
 }
 

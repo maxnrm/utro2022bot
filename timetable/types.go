@@ -1,5 +1,16 @@
 package timetable
 
+// Timetable is timetable
+type Timetable struct {
+	Name   string  `json:"name"`
+	Events []Event `json:"rowObjects"`
+}
+
+type FormattedTimetable struct {
+	Name            string `json:"name"`
+	FormattedEvents []string
+}
+
 // Event is timetable event
 type Event struct {
 	Hidden       string `json:"Скрыть"`
@@ -13,5 +24,6 @@ type Event struct {
 
 // Wrapper is you know
 type Wrapper struct {
-	Timetable []Timetable `json:"timetable"`
+	Timetables          []Timetable `json:"timetable"`
+	FormattedTimeTables []FormattedTimetable
 }
