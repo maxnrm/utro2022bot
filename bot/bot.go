@@ -2,6 +2,8 @@ package bot
 
 import (
 	"log"
+	"os"
+	"strconv"
 	"strings"
 
 	"github.com/maxnrm/utro2022bot/db"
@@ -81,10 +83,12 @@ func createTimetableHandler(ttw *tt.Wrapper) tele.HandlerFunc {
 			return setProgramHandler(c)
 		}
 
+		if !isUserSubscribed(c) {
+			return c.Send("")
+		}
+
 		currentTimetable := ttw.Timetables[0].Events
 		currentFormattedTimetable := ttw.Timetables[0].FormattedEvents
-
-		println(len(currentFormattedTimetable), len(currentTimetable))
 
 		for i := range currentTimetable {
 			event := currentTimetable[i]
@@ -128,6 +132,35 @@ func setProgramHandler(c tele.Context) error {
 	return c.Send("Выбери программу, расписание которой хочешь видеть в боте:", setProgramInlineMarkup)
 }
 
+func isUserSubscribed(c tele.Context) bool {
+	val, err := strconv.Atoi(os.Getenv("IMPORTANT_CHANNEL_ID"))
+	if err != nil {
+		println("Important channel ENV broken")
+		return true
+	}
+	var importantChannelID int64 = int64(val)
+	importantChannel, err := c.Bot().ChatByID(importantChannelID)
+	if err != nil {
+		println("Important channel ID seems to be wrong")
+		return true
+	}
+
+	invite := importantChannel.InviteLink
+	chatMember, err := c.Bot().ChatMemberOf(importantChannel, c.Chat())
+	if err != nil {
+		println("Important channel ID or user ID seems to be wrong")
+		return true
+	}
+
+	isSubscribed := chatMember.Role != "left"
+
+	if isSubscribed {
+		c.Send("Вижу ты не подписан на канал с очень важными обновлениями! Держиссылку " + invite)
+	}
+
+	return isSubscribed
+}
+
 func createSetProgramVariantHandler(btn *tele.InlineButton, dbHandler *db.Handler) tele.HandlerFunc {
 	return func(c tele.Context) error {
 		var user db.User
@@ -142,35 +175,6 @@ func createSetProgramVariantHandler(btn *tele.InlineButton, dbHandler *db.Handle
 		return c.Delete()
 	}
 }
-
-// func checkUserSubscribed(dbHandler *db.Handler) tele.MiddlewareFunc {
-
-// 	return func(next tele.HandlerFunc) tele.HandlerFunc {
-// 		return func(c tele.Context) error {
-
-// 			// user = dbHandler.GetUser(userID)
-
-// 			var importantChannelID int64 = os.GetEnv("IMPORTANT_CHANNEL_ID")
-// 			importantChannel, err := c.Bot().ChatByID(importantChannelID)
-// 			user, err := c.Bot().ChatMemberOf(importantChannel, c.Chat())
-// 			if err != nil {
-// 				fmt.Println("Chat ID is not ok!")
-// 			}
-// 			fmt.Println(user.Anonymous)
-// 			channelLink := importantChannel.InviteLink
-
-// 			//return if user is joined chat
-// 			_, err = c.Bot().ChatMemberOf(importantChannel, c.Chat())
-// 			if err == nil {
-// 				return next(c)
-// 			}
-
-// 			c.Send("Кажется ты еще не подписан на наш канал с очень важными апдейтами! Держи ссылку" + channelLink)
-
-// 			return next(c)
-// 		}
-// 	}
-// }
 
 func miniLogger() tele.MiddlewareFunc {
 	l := log.Default()
