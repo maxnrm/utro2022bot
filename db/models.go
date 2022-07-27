@@ -1,7 +1,6 @@
 package db
 
 import (
-	"github.com/maxnrm/utro2022bot/timetable"
 	"gorm.io/gorm"
 )
 
@@ -12,8 +11,8 @@ type User struct {
 	JoinedChannel bool   `json:"joinedChannel"`
 }
 
-// TimetableWrapper for storing timetables
-type TimetableWrapper struct {
+// Timetable for storing timetables
+type Timetable struct {
 	gorm.Model
-	timetable.Wrapper
+	TimetableString string `json:"timetableString"`
 }

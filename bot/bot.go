@@ -28,7 +28,7 @@ const (
 )
 
 var (
-	dbHandler db.Handler = db.New()
+	dbHandler db.Handler = db.DBHandler
 
 	btnEco    = tele.InlineButton{Text: uralEco, Unique: "seturaleco", Data: "эко"}
 	btnUrb    = tele.InlineButton{Text: uralUrb, Unique: "seturalurb", Data: "урб"}
@@ -83,16 +83,18 @@ func createTimetableHandler(ttw *tt.Wrapper) tele.HandlerFunc {
 
 		currentTimetable := ttw.Timetables[0].Events
 		currentFormattedTimetable := ttw.Timetables[0].FormattedEvents
+
+		println(len(currentFormattedTimetable), len(currentTimetable))
+
 		for i := range currentTimetable {
-			formattedEvent := currentFormattedTimetable[i]
 			event := currentTimetable[i]
+			formattedEvent := currentFormattedTimetable[i]
 
 			isEmpty := strings.TrimSpace(formattedEvent) == ""
 			isHidden := event.Hidden == "да"
 			isMatchGroup := user.Group == event.Participants || strings.TrimSpace(event.Participants) == ""
 
 			shouldSend := !isEmpty && !isHidden && isMatchGroup
-			println(event.Order, user.Group, event.Participants)
 
 			if shouldSend {
 				c.Send(formattedEvent, tele.ModeHTML)

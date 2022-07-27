@@ -10,6 +10,9 @@ import (
 	"gorm.io/gorm/clause"
 )
 
+// DBHandler singleton instance of db
+var DBHandler Handler = New()
+
 // Init is init
 func Init() *gorm.DB {
 
@@ -21,6 +24,7 @@ func Init() *gorm.DB {
 		log.Fatalln(err)
 	}
 
+	db.AutoMigrate(&Timetable{})
 	db.AutoMigrate(&User{})
 
 	return db
@@ -51,19 +55,30 @@ func (h Handler) AddUser(user *User, columns []string) {
 }
 
 // AddTimetable saves timetable in case it needs to be loaded on server startup
-func (h Handler) AddTimetable(user *TimetableWrapper, columns []string) {
+func (h Handler) AddTimetable(ttString string) {
+
+	var timetable Timetable = Timetable{TimetableString: ttString}
 
 	if result := h.DB.Clauses(clause.OnConflict{
 		Columns:   []clause.Column{{Name: "id"}},
-		DoUpdates: clause.AssignmentColumns(columns),
-	}).Create(&user); result.Error != nil {
+		DoUpdates: clause.AssignmentColumns([]string{"timetable_string"}),
+	}).Create(&timetable); result.Error != nil {
 		fmt.Println(result.Error)
 	}
 
 	return
 }
 
-// GetUser adds user
+// GetTimetable gets latest timetable
+func (h Handler) GetTimetable() (string, error) {
+
+	var timetable Timetable
+	result := h.DB.First(&timetable)
+
+	return timetable.TimetableString, result.Error
+}
+
+// GetUser gets user by id
 func (h Handler) GetUser(tgUserID int64) User {
 
 	var user User
