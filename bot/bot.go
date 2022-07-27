@@ -2,11 +2,21 @@ package bot
 
 import (
 	"log"
+	"strings"
 
 	"github.com/maxnrm/utro2022bot/db"
 	tt "github.com/maxnrm/utro2022bot/timetable"
 	tele "gopkg.in/telebot.v3"
 )
+
+// Program is for
+type Program struct {
+	full   string
+	short  string
+	unique string
+}
+
+// Programs is a list of programs
 
 const (
 	uralEco    = "Урал.Эко-сообщества"
@@ -20,12 +30,12 @@ const (
 var (
 	dbHandler db.Handler = db.New()
 
-	btnEco    = tele.InlineButton{Text: uralEco, Unique: "seturaleco"}
-	btnUrb    = tele.InlineButton{Text: uralUrb, Unique: "seturalurb"}
-	btnCreate = tele.InlineButton{Text: uralCreate, Unique: "seturalcreate"}
-	btnInvolv = tele.InlineButton{Text: uralInvolv, Unique: "seturalinvolv"}
-	btnEdu    = tele.InlineButton{Text: uralEdu, Unique: "seturaledu"}
-	btnHealth = tele.InlineButton{Text: uralHealth, Unique: "seturalhealth"}
+	btnEco    = tele.InlineButton{Text: uralEco, Unique: "seturaleco", Data: "эко"}
+	btnUrb    = tele.InlineButton{Text: uralUrb, Unique: "seturalurb", Data: "урб"}
+	btnCreate = tele.InlineButton{Text: uralCreate, Unique: "seturalcreate", Data: "креа"}
+	btnInvolv = tele.InlineButton{Text: uralInvolv, Unique: "seturalinvolv", Data: "вовл"}
+	btnEdu    = tele.InlineButton{Text: uralEdu, Unique: "seturaledu", Data: "обр"}
+	btnHealth = tele.InlineButton{Text: uralHealth, Unique: "seturalhealth", Data: "зож"}
 
 	setProgramInlineMarkup = &tele.ReplyMarkup{InlineKeyboard: setProgramInlineBtns}
 	setProgramInlineBtns   = [][]tele.InlineButton{
@@ -65,22 +75,28 @@ func AddHandlers(timetableWrapper *tt.Wrapper) func(*tele.Bot) *tele.Bot {
 
 func createTimetableHandler(ttw *tt.Wrapper) tele.HandlerFunc {
 	return func(c tele.Context) error {
-
-		currentTimetable := ttw.Timetables[0].Events
-		currentFormattedTimetable := ttw.FormattedTimeTables[0].FormattedEvents
-
-		var sendOptions tele.SendOptions
-		sendOptions.ParseMode = tele.ModeHTML
-
-		for i := range currentTimetable {
-			c.Send(currentFormattedTimetable[i], tele.ModeHTML)
-		}
-
 		userID := c.Chat().ID
-
 		user := dbHandler.GetUser(userID)
 		if user.ID == 0 {
 			return setProgramHandler(c)
+		}
+
+		currentTimetable := ttw.Timetables[0].Events
+		currentFormattedTimetable := ttw.Timetables[0].FormattedEvents
+		for i := range currentTimetable {
+			formattedEvent := currentFormattedTimetable[i]
+			event := currentTimetable[i]
+
+			isEmpty := strings.TrimSpace(formattedEvent) == ""
+			isHidden := event.Hidden == "да"
+			isMatchGroup := user.Group == event.Participants || strings.TrimSpace(event.Participants) == ""
+
+			shouldSend := !isEmpty && !isHidden && isMatchGroup
+			println(event.Order, user.Group, event.Participants)
+
+			if shouldSend {
+				c.Send(formattedEvent, tele.ModeHTML)
+			}
 		}
 
 		return c.Send("")
@@ -115,7 +131,7 @@ func createSetProgramVariantHandler(btn *tele.InlineButton, dbHandler *db.Handle
 		var user db.User
 
 		user.ID = c.Chat().ID
-		user.Group = btn.Unique
+		user.Group = btn.Data
 
 		dbHandler.AddUser(&user, []string{"group"})
 

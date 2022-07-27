@@ -50,6 +50,19 @@ func (h Handler) AddUser(user *User, columns []string) {
 	return
 }
 
+// AddTimetable saves timetable in case it needs to be loaded on server startup
+func (h Handler) AddTimetable(user *TimetableWrapper, columns []string) {
+
+	if result := h.DB.Clauses(clause.OnConflict{
+		Columns:   []clause.Column{{Name: "id"}},
+		DoUpdates: clause.AssignmentColumns(columns),
+	}).Create(&user); result.Error != nil {
+		fmt.Println(result.Error)
+	}
+
+	return
+}
+
 // GetUser adds user
 func (h Handler) GetUser(tgUserID int64) User {
 

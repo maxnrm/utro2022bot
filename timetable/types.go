@@ -2,20 +2,20 @@ package timetable
 
 // Timetable is timetable
 type Timetable struct {
-	Name   string  `json:"name"`
-	Events []Event `json:"rowObjects"`
-}
-
-type FormattedTimetable struct {
-	Name            string `json:"name"`
-	FormattedEvents []string
+	Name            string   `json:"name"`
+	Day             string   `json:"day"`
+	Week            string   `json:"week"`
+	Events          []Event  `json:"rowObjects"`
+	FormattedEvents []string `json:"-"`
 }
 
 // Event is timetable event
 type Event struct {
 	Hidden       string `json:"Скрыть"`
 	Order        string `json:"Иерархия"`
-	Participants string `json:"Учавствуют"`
+	Participants string `json:"Участники"`
+	Speakers     string `json:"Спикеры"`
+	Moderator    string `json:"Модератор"`
 	Time         string `json:"Время"`
 	Name         string `json:"Название"`
 	Description  string `json:"Описание"`
@@ -24,6 +24,5 @@ type Event struct {
 
 // Wrapper is you know
 type Wrapper struct {
-	Timetables          []Timetable `json:"timetable"`
-	FormattedTimeTables []FormattedTimetable
+	Timetables []Timetable `json:"timetables"`
 }

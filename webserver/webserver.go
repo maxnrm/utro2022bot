@@ -13,12 +13,15 @@ func ping(c *gin.Context) {
 	})
 }
 
-func timetableHandler(timetable *tt.Wrapper) gin.HandlerFunc {
+func timetableHandler(ttw *tt.Wrapper) gin.HandlerFunc {
 	return func(c *gin.Context) {
-		if c.BindJSON(&timetable) == nil {
+		err := c.BindJSON(ttw)
+		if err == nil {
 			c.Status(http.StatusNoContent)
+		} else {
+			println(err.Error())
 		}
-		timetable.FormatSelf()
+		ttw.FormatSelf()
 	}
 }
 
