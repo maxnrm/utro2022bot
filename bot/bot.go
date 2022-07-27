@@ -154,7 +154,7 @@ func isUserSubscribed(c tele.Context) bool {
 
 	isSubscribed := chatMember.Role != "left"
 
-	if isSubscribed {
+	if !isSubscribed {
 		c.Send("Вижу ты не подписан на канал с очень важными обновлениями! Держиссылку " + invite)
 	}
 
