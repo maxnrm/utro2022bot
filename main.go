@@ -1,82 +1,45 @@
 package main
 
 import (
-	"fmt"
-	"log"
-	"net/http"
+	"encoding/json"
 	"os"
 	"time"
 
 	"github.com/gin-gonic/gin"
+	tgb "github.com/maxnrm/utro2022bot/bot"
+	"github.com/maxnrm/utro2022bot/db"
+	tt "github.com/maxnrm/utro2022bot/timetable"
+	ws "github.com/maxnrm/utro2022bot/webserver"
 	tele "gopkg.in/telebot.v3"
 )
 
-// Event is timetable event
-type Event struct {
-	Hidden       string `json:"Скрыть"`
-	Order        string `json:"Иерархия"`
-	Participants string `json:"Учавствуют"`
-	Time         string `json:"Время"`
-	Name         string `json:"Название"`
-	Description  string `json:"Описание"`
-	Place        string `json:"Место"`
-}
-
-// Timetable is timetable
-type Timetable struct {
-	Name   string  `json:"name"`
-	Events []Event `json:"rowObjects"`
-}
-
-// TimetableWrapper is you know
-type TimetableWrapper struct {
-	Timetable []Timetable `json:"timetable"`
-}
+var dbHandler db.Handler = db.DBHandler
 
 func main() {
-	var timetable TimetableWrapper
-	var tt string
 
-	go func() {
-		r := gin.Default()
+	var Token string = os.Getenv("TELEGRAM_BOT_KEY")
 
-		r.POST("/timetable", func(c *gin.Context) {
-			if c.BindJSON(&timetable) == nil {
-				tt = ""
-				for _, v := range timetable.Timetable[0].Events {
-					tt += fmt.Sprintf("%s %s %s %s\n", v.Time, v.Name, v.Description, v.Place)
-				}
-				c.String(http.StatusOK, tt)
-			}
-		})
+	var timetableWrapper tt.Wrapper
+	ttStr, err := dbHandler.GetTimetable()
+	if err == nil {
+		json.Unmarshal([]byte(ttStr), &timetableWrapper)
+		timetableWrapper.FormatSelf()
+	} else {
+		println("Error", err)
+	}
 
-		r.GET("/ping", func(c *gin.Context) {
-			c.JSON(http.StatusOK, gin.H{
-				"message": "pong",
-			})
-		})
-
-		r.Run() // listen and serve on 0.0.0.0:8080 (for windows "localhost:8080")
-
-	}()
-
-	pref := tele.Settings{
-		Token:  os.Getenv("TOKEN"),
+	teleBotSettings := tele.Settings{
+		Token:  Token,
 		Poller: &tele.LongPoller{Timeout: 10 * time.Second},
 	}
+	r := gin.Default()
+	b, _ := tele.NewBot(teleBotSettings)
 
-	b, err := tele.NewBot(pref)
-	if err != nil {
-		log.Fatal(err)
-		return
-	}
+	r.SetTrustedProxies(nil)
 
-	// b.Use(middleware.Logger())
+	ws.CreateRoutes(&timetableWrapper)(r)
+	tgb.AddHandlers(&timetableWrapper)(b)
 
-	b.Handle("/timetable", func(c tele.Context) error {
-		return c.Send(tt)
-		// return c.Send("timetable")
-	})
-	println("Bot started")
+	go r.Run()
 	b.Start()
 }
