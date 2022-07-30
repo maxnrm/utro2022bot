@@ -2,18 +2,24 @@ name: Docker Image CI
 
 on:
   push:
-    tags: [ '\d+.\d+.\d+' ]
+    tags: ['\d+.\d+.\d+']
   pull_request:
-    tags: [ '\d+.\d+.\d+' ]
+    tags: ['\d+.\d+.\d+']
 
 jobs:
   build:
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v3
+
+      - name: Set env
+        run: echo "RELEASE_VERSION=${GITHUB_REF#refs/*/}" >> $GITHUB_ENV
+
       - name: Kaniko build
         uses: aevea/action-kaniko@master
         with:
           image: ${{ secrets.IMAGE_NAME }}
           username: ${{ secrets.DOCKERHUB_USERNAME }}
           password: ${{ secrets.DOCKERHUB_PASSWORD }}
+          tag: ${{ env.RELEASE_VERSION }}
+          tag_with_latest: true
