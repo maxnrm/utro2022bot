@@ -1,13 +1,31 @@
 package timetable
 
 import (
+	"encoding/json"
 	"fmt"
 	"strings"
+
+	"github.com/maxnrm/utro2022bot/db"
 )
 
-type sendEvent struct {
-	pre string
-	src string
+var dbHandler db.Handler = db.DBHandler
+
+// TimetableWrapper is gloabal timetable object
+var TimetableWrapper = New()
+
+//New create new wrapper
+func New() Wrapper {
+	var timetableWrapper *Wrapper
+
+	ttStr, err := dbHandler.GetTimetable()
+	if err == nil {
+		json.Unmarshal([]byte(ttStr), &timetableWrapper)
+		timetableWrapper.FormatSelf()
+	} else {
+		println("Error", err)
+	}
+
+	return *timetableWrapper
 }
 
 //FormatSelf is for creating text events to send to tg

@@ -1,5 +1,10 @@
 package timetable
 
+type sendEvent struct {
+	pre string
+	src string
+}
+
 // Timetable is timetable
 type Timetable struct {
 	Name            string   `json:"name"`

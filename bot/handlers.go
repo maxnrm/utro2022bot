@@ -10,7 +10,7 @@ import (
 
 var (
 	dbHandler        db.Handler = db.DBHandler
-	timetableWrapper tt.Wrapper
+	timetableWrapper tt.Wrapper = tt.TimetableWrapper
 
 	setProgramBtns [][]tele.InlineButton = [][]tele.InlineButton{
 		{tele.InlineButton{Text: "Урал.Эко-сообщества", Unique: "seturaleco", Data: "эко"}},
