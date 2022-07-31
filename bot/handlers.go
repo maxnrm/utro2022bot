@@ -1,6 +1,7 @@
 package bot
 
 import (
+	"strconv"
 	"strings"
 
 	"github.com/maxnrm/utro2022bot/db"
@@ -55,6 +56,7 @@ func timetableHandlerFactory(ttw *tt.Wrapper) tele.HandlerFunc {
 
 		currentTimetable := ttw.Timetables[0].Events
 		currentFormattedTimetable := ttw.Timetables[0].FormattedEvents
+		sendableMessages := make(map[int]string)
 
 		for i := range currentTimetable {
 			event := currentTimetable[i]
@@ -66,9 +68,16 @@ func timetableHandlerFactory(ttw *tt.Wrapper) tele.HandlerFunc {
 
 			shouldSend := !isEmpty && !isHidden && isMatchGroup
 
+			order, _ := strconv.Atoi(strings.TrimSpace(event.Order))
+
 			if shouldSend {
-				c.Send(formattedEvent, tele.ModeHTML)
+				sendableMessages[order] += "\n\n" + formattedEvent
 			}
+
+		}
+
+		for i := 1; i <= len(sendableMessages); i++ {
+			c.Send(sendableMessages[i], tele.ModeHTML)
 		}
 
 		return c.Send("")

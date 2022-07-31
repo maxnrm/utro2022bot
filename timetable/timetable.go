@@ -34,12 +34,12 @@ func (t *Wrapper) FormatSelf() {
 		t.Timetables[i].FormattedEvents = make([]string, len(tt.Events))
 		for j, event := range tt.Events {
 			lines := []sendEvent{
-				{pre: "", src: fmt.Sprintf("<b><u>%v</u></b>", event.Time)},
+				{pre: "&#128337;", src: fmt.Sprintf("<b><u>%v</u></b>", event.Time)},
 				{pre: "", src: strings.ToUpper(event.Name)},
 				{pre: "<b>Спикеры:</b>", src: fmt.Sprintf("%v", event.Speakers)},
 				{pre: "<b>Модератор:</b>", src: fmt.Sprintf("%v", event.Moderator)},
 				{pre: "", src: fmt.Sprintf("%v", event.Description)},
-				{pre: "", src: strings.ToUpper(event.Place)},
+				{pre: "&#128205;", src: strings.ToUpper(event.Place)},
 			}
 
 			onlyFilledLines := []string{}
