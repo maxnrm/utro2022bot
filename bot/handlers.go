@@ -28,7 +28,7 @@ var (
 	}
 
 	dayInfoMap map[string]dayInfo = map[string]dayInfo{
-		"31.07.2022": {photo: &tele.Photo{File: tele.FromDisk("./img/1.jpg")}, timetableName: "смена1_день1"},
+		"31.07.2022": {photo: &tele.Photo{File: tele.FromDisk("./img/1.jpg")}, timetableName: "смена1_день2"},
 		"01.08.2022": {photo: &tele.Photo{File: tele.FromDisk("./img/1.jpg")}, timetableName: "смена1_день1"},
 		"02.08.2022": {photo: &tele.Photo{File: tele.FromDisk("./img/2.jpg")}, timetableName: "смена1_день2"},
 		"03.08.2022": {photo: &tele.Photo{File: tele.FromDisk("./img/3.jpg")}, timetableName: "смена1_день3"},

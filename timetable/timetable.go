@@ -35,11 +35,11 @@ func (t *Wrapper) FormatSelf() {
 		for j, event := range tt.Events {
 			lines := []sendEvent{
 				{pre: "&#128337;<b><u>", post: "</u></b>", src: event.Time},
-				{pre: "", post: "", src: strings.ToUpper(event.Name)},
+				{pre: "<b>", post: "</b>", src: event.Name},
 				{pre: "<b>Спикеры:</b>", post: "", src: event.Speakers},
 				{pre: "<b>Модератор:</b>", post: "", src: event.Moderator},
 				{pre: "", post: "", src: event.Description},
-				{pre: "&#128205;", post: "", src: strings.ToUpper(event.Place)},
+				{pre: "&#128205;", post: "", src: event.Place},
 			}
 
 			onlyFilledLines := []string{}
