@@ -20,6 +20,7 @@ RUN apk add ca-certificates
 WORKDIR /app/bot
 
 COPY --from=build_base /tmp/bot/out/bot /app/bot
+COPY --from=build_base /tmp/bot/img/* /app/bot/img
 
 EXPOSE 3000
 
