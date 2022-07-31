@@ -53,6 +53,7 @@ func (h Handler) AddUser(user *User, columns []string) {
 func (h Handler) AddTimetable(ttString string) {
 
 	var timetable Timetable = Timetable{TimetableString: ttString}
+	timetable.ID = 1
 
 	if result := h.DB.Clauses(clause.OnConflict{
 		Columns:   []clause.Column{{Name: "id"}},
