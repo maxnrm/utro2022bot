@@ -22,7 +22,7 @@ var (
 		{tele.InlineButton{Text: "Урал. Эко-сообщества", Unique: "seturaleco", Data: "эко"}},
 		{tele.InlineButton{Text: "Урал. Урбанистические сообщества", Unique: "seturalurb", Data: "урб"}},
 		{tele.InlineButton{Text: "Урал. Креативные сообщества", Unique: "seturalcreate", Data: "креа"}},
-		// {tele.InlineButton{Text: "Урал.Вовлеченные сообщества", Unique: "seturalinvolv", Data: "вовл"}},
+		{tele.InlineButton{Text: "Менторская программа", Unique: "setmentor", Data: "ментор"}},
 		// {tele.InlineButton{Text: "Урал.Образовательные сообщества", Unique: "seturaledu", Data: "обр"}},
 		// {tele.InlineButton{Text: "Урал.ЗОЖ-сообщества", Unique: "seturalhealth", Data: "зож"}},
 	}
