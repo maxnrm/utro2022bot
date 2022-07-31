@@ -9,6 +9,11 @@ import (
 	tele "gopkg.in/telebot.v3"
 )
 
+type dayInfo struct {
+	photo         *tele.Photo
+	timetableName string
+}
+
 var (
 	dbHandler        db.Handler = db.DBHandler
 	timetableWrapper tt.Wrapper = tt.TimetableWrapper
@@ -22,9 +27,24 @@ var (
 		{tele.InlineButton{Text: "Урал.ЗОЖ-сообщества", Unique: "seturalhealth", Data: "зож"}},
 	}
 
-	setProgramInlineMarkup = &tele.ReplyMarkup{InlineKeyboard: setProgramBtns}
+	dayInfoMap map[string]dayInfo = map[string]dayInfo{
+		"31.07.2022": {photo: &tele.Photo{File: tele.FromDisk("./img/1.jpg")}, timetableName: "смена1_день1"},
+		"01.08.2022": {photo: &tele.Photo{File: tele.FromDisk("./img/1.jpg")}, timetableName: "смена1_день1"},
+		"02.08.2022": {photo: &tele.Photo{File: tele.FromDisk("./img/2.jpg")}, timetableName: "смена1_день2"},
+		"03.08.2022": {photo: &tele.Photo{File: tele.FromDisk("./img/3.jpg")}, timetableName: "смена1_день3"},
+		"04.08.2022": {photo: &tele.Photo{File: tele.FromDisk("./img/4.jpg")}, timetableName: "смена1_день4"},
+		"05.08.2022": {photo: &tele.Photo{File: tele.FromDisk("./img/5.jpg")}, timetableName: "смена1_день5"},
+		"06.08.2022": {photo: &tele.Photo{File: tele.FromDisk("./img/6.jpg")}, timetableName: "смена1_день6"},
+		"08.08.2022": {photo: &tele.Photo{File: tele.FromDisk("./img/1.jpg")}, timetableName: "смена2_день1"},
+		"09.08.2022": {photo: &tele.Photo{File: tele.FromDisk("./img/2.jpg")}, timetableName: "смена2_день2"},
+		"10.08.2022": {photo: &tele.Photo{File: tele.FromDisk("./img/3.jpg")}, timetableName: "смена2_день3"},
+		"11.08.2022": {photo: &tele.Photo{File: tele.FromDisk("./img/4.jpg")}, timetableName: "смена2_день4"},
+		"12.08.2022": {photo: &tele.Photo{File: tele.FromDisk("./img/5.jpg")}, timetableName: "смена2_день5"},
+		"13.08.2022": {photo: &tele.Photo{File: tele.FromDisk("./img/6.jpg")}, timetableName: "смена2_день6"},
+	}
 
-	timetableHandler = timetableHandlerFactory(&timetableWrapper)
+	setProgramInlineMarkup = &tele.ReplyMarkup{InlineKeyboard: setProgramBtns}
+	timetableHandler       = timetableHandlerFactory(&timetableWrapper)
 )
 
 func programCallbackHandlerFactory(btn *tele.InlineButton) tele.HandlerFunc {
@@ -54,8 +74,11 @@ func timetableHandlerFactory(ttw *tt.Wrapper) tele.HandlerFunc {
 			return c.Send("")
 		}
 
-		currentTimetable := ttw.Timetables[0].Events
-		currentFormattedTimetable := ttw.Timetables[0].FormattedEvents
+		currentDateString := getToday()
+		currentTimetableIndex := getTimetableIndex(ttw.Timetables, dayInfoMap[currentDateString].timetableName)
+
+		currentTimetable := ttw.Timetables[currentTimetableIndex].Events
+		currentFormattedTimetable := ttw.Timetables[currentTimetableIndex].FormattedEvents
 		sendableMessages := make(map[int]string)
 
 		for i := range currentTimetable {
@@ -75,6 +98,8 @@ func timetableHandlerFactory(ttw *tt.Wrapper) tele.HandlerFunc {
 			}
 
 		}
+
+		c.Send(dayInfoMap[currentDateString].photo, tele.ModeHTML)
 
 		for i := 1; i <= len(sendableMessages); i++ {
 			c.Send(sendableMessages[i], tele.ModeHTML)

@@ -34,17 +34,17 @@ func (t *Wrapper) FormatSelf() {
 		t.Timetables[i].FormattedEvents = make([]string, len(tt.Events))
 		for j, event := range tt.Events {
 			lines := []sendEvent{
-				{pre: "&#128337;", src: fmt.Sprintf("<b><u>%v</u></b>", event.Time)},
-				{pre: "", src: strings.ToUpper(event.Name)},
-				{pre: "<b>Спикеры:</b>", src: fmt.Sprintf("%v", event.Speakers)},
-				{pre: "<b>Модератор:</b>", src: fmt.Sprintf("%v", event.Moderator)},
-				{pre: "", src: fmt.Sprintf("%v", event.Description)},
-				{pre: "&#128205;", src: strings.ToUpper(event.Place)},
+				{pre: "&#128337;<b><u>", post: "</u></b>", src: event.Time},
+				{pre: "", post: "", src: strings.ToUpper(event.Name)},
+				{pre: "<b>Спикеры:</b>", post: "", src: event.Speakers},
+				{pre: "<b>Модератор:</b>", post: "", src: event.Moderator},
+				{pre: "", post: "", src: event.Description},
+				{pre: "&#128205;", post: "", src: strings.ToUpper(event.Place)},
 			}
 
 			onlyFilledLines := []string{}
 			for _, v := range skipEmptySendEvents(lines) {
-				formattedLine := strings.TrimSpace(fmt.Sprintf("%v %v", v.pre, v.src))
+				formattedLine := strings.TrimSpace(fmt.Sprintf("%v %v %v", v.pre, v.src, v.post))
 				onlyFilledLines = append(onlyFilledLines, formattedLine)
 			}
 			stringEvent := strings.Join(onlyFilledLines, "\n")

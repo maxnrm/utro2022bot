@@ -1,8 +1,9 @@
 package timetable
 
 type sendEvent struct {
-	pre string
-	src string
+	pre  string
+	post string
+	src  string
 }
 
 // Timetable is timetable

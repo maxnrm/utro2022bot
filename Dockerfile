@@ -17,6 +17,7 @@ RUN go build -o ./out/bot .
 #DEPLOY
 FROM alpine:3.16 
 RUN apk add ca-certificates
+WORKDIR /app/bot
 
 COPY --from=build_base /tmp/bot/out/bot /app/bot
 
