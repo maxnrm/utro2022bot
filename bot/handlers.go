@@ -26,10 +26,6 @@ var (
 	timetableHandler = timetableHandlerFactory(&timetableWrapper)
 )
 
-var (
-	programCallbackHandlers []tele.HandlerFunc
-)
-
 func programCallbackHandlerFactory(btn *tele.InlineButton) tele.HandlerFunc {
 	return func(c tele.Context) error {
 		var user db.User

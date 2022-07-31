@@ -33,6 +33,12 @@ func New() *tele.Bot {
 func addHandlers(b *tele.Bot) *tele.Bot {
 
 	b.Use(miniLogger())
+
+	for _, btn := range setProgramBtns {
+		btnValue := &btn[0]
+		b.Handle(btnValue, programCallbackHandlerFactory(btnValue))
+	}
+
 	b.Handle("/start", startHandler)
 	b.Handle("/help", helpHandler)
 	b.Handle("/timetable", timetableHandler)
