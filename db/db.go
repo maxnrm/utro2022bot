@@ -13,6 +13,12 @@ import (
 // DBHandler singleton instance of db
 var DBHandler Handler = New()
 
+// New is new
+func New() Handler {
+	db := Init()
+	return Handler{db}
+}
+
 // Init is init
 func Init() *gorm.DB {
 
@@ -28,17 +34,6 @@ func Init() *gorm.DB {
 	db.AutoMigrate(&User{})
 
 	return db
-}
-
-// Handler is handler
-type Handler struct {
-	DB *gorm.DB
-}
-
-// New is new
-func New() Handler {
-	db := Init()
-	return Handler{db}
 }
 
 // AddUser adds user. 'columns' regulates what columns will be updated
@@ -58,6 +53,7 @@ func (h Handler) AddUser(user *User, columns []string) {
 func (h Handler) AddTimetable(ttString string) {
 
 	var timetable Timetable = Timetable{TimetableString: ttString}
+	timetable.ID = 1
 
 	if result := h.DB.Clauses(clause.OnConflict{
 		Columns:   []clause.Column{{Name: "id"}},
