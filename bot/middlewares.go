@@ -31,7 +31,7 @@ func isUserSubscribed(c tele.Context) bool {
 	isSubscribed := chatMember.Role != "left"
 
 	if !isSubscribed {
-		c.Send("Вижу, ты не подписан на канал с очень важными обновлениями!\n\nДержиссылку "+invite+"\n\nПодпишись, и жми кнопку \"Посмотреть расписание\"", timetableInlineMarkup)
+		c.Send("Вижу, ты не подписан на канал с очень важными обновлениями!\n\nДержиссылку "+invite+"\n\nПодпишись, и жми кнопку «Посмотреть расписание»", timetableInlineMarkup)
 	}
 
 	return isSubscribed

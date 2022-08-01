@@ -59,7 +59,7 @@ func programCallbackHandlerFactory(btn *tele.InlineButton) tele.HandlerFunc {
 
 		dbHandler.AddUser(&user, []string{"group"})
 
-		c.Send("Ты выбрал программу "+btn.Text+". Теперь ты будешь получать расписание для этой программы.", timetableInlineMarkup)
+		c.Send("Ты выбрал программу «"+btn.Text+"». Теперь ты будешь получать расписание для этой программы.", timetableInlineMarkup)
 
 		return c.Delete()
 	}
