@@ -27,6 +27,8 @@ var (
 		// {tele.InlineButton{Text: "Урал.ЗОЖ-сообщества", Unique: "seturalhealth", Data: "зож"}},
 	}
 
+	timetableBtn [][]tele.InlineButton = [][]tele.InlineButton{{tele.InlineButton{Text: "Посмотреть расписание", Unique: "seetimetable"}}}
+
 	dayInfoMap map[string]dayInfo = map[string]dayInfo{
 		"31.07.2022": {photo: &tele.Photo{File: tele.FromDisk("./img/1.jpg")}, timetableName: "смена1_день2"},
 		"01.08.2022": {photo: &tele.Photo{File: tele.FromDisk("./img/1.jpg")}, timetableName: "смена1_день1"},
@@ -44,6 +46,7 @@ var (
 	}
 
 	setProgramInlineMarkup = &tele.ReplyMarkup{InlineKeyboard: setProgramBtns}
+	timetableInlineMarkup  = &tele.ReplyMarkup{InlineKeyboard: timetableBtn}
 	timetableHandler       = timetableHandlerFactory(&timetableWrapper)
 )
 
@@ -56,7 +59,7 @@ func programCallbackHandlerFactory(btn *tele.InlineButton) tele.HandlerFunc {
 
 		dbHandler.AddUser(&user, []string{"group"})
 
-		c.Send("Ты выбрал программу " + btn.Text + ". Теперь ты будешь получать расписание для этой программы.")
+		c.Send("Ты выбрал программу "+btn.Text+". Теперь ты будешь получать расписание для этой программы.", timetableInlineMarkup)
 
 		return c.Delete()
 	}

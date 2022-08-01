@@ -39,6 +39,8 @@ func addHandlers(b *tele.Bot) *tele.Bot {
 		b.Handle(btnValue, programCallbackHandlerFactory(btnValue))
 	}
 
+	b.Handle(&timetableBtn[0][0], timetableHandler)
+
 	b.Handle("/start", startHandler)
 	b.Handle("/help", helpHandler)
 	b.Handle("/timetable", timetableHandler)

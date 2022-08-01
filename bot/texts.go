@@ -4,15 +4,20 @@ import "strings"
 
 var (
 	startTextArr []string = []string{"Привет! Я Ботутра, твой бот-помощник!",
+		"\n",
 		"Список команд:",
 		"/timetable - Посмотреть расписание",
 		"/setprogram - Выбрать программу",
-		"/help - Список комманд"}
+		"/help - Список комманд",
+		"\n",
+		"Команды так же доступны по кнопке Menu, слева от строки ввода текста"}
 
 	helpTextArr []string = []string{"Список команд:",
 		"/timetable - Посмотреть расписание",
 		"/setprogram - Выбрать программу",
-		"/help - Список комманд"}
+		"/help - Список комманд",
+		"\n",
+		"Команды так же доступны по кнопке Menu, слева от строки ввода текста"}
 
 	startText      string = strings.Join(startTextArr, "\n")
 	helpText       string = strings.Join(helpTextArr, "\n")
