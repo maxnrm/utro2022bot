@@ -9,8 +9,10 @@ import (
 
 func getToday() string {
 	today := time.Now()
+	format := "02.01.2006"
+	shift := -time.Hour * 6
 
-	return today.Format("02.01.2006")
+	return today.Add(shift).Format(format)
 }
 
 func getTimetableIndex(tts []tt.Timetable, name string) int {
