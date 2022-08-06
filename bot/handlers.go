@@ -19,30 +19,25 @@ var (
 	timetableWrapper tt.Wrapper = tt.TimetableWrapper
 
 	setProgramBtns [][]tele.InlineButton = [][]tele.InlineButton{
-		{tele.InlineButton{Text: "Урал. Эко-сообщества", Unique: "seturaleco", Data: "эко"}},
-		{tele.InlineButton{Text: "Урал. Урбанистические сообщества", Unique: "seturalurb", Data: "урб"}},
-		{tele.InlineButton{Text: "Урал. Креативные сообщества", Unique: "seturalcreate", Data: "креа"}},
+		{tele.InlineButton{Text: "Урал. ЗОЖ-сообщества", Unique: "seturalzozh", Data: "зож"}},
+		{tele.InlineButton{Text: "Урал. Вовлеченные сообщества", Unique: "seturalinvolv", Data: "вовл"}},
+		{tele.InlineButton{Text: "Урал. Образовательные сообщества", Unique: "seturaledu", Data: "обр"}},
 		{tele.InlineButton{Text: "Менторская программа", Unique: "setmentor", Data: "ментор"}},
-		// {tele.InlineButton{Text: "Урал.Образовательные сообщества", Unique: "seturaledu", Data: "обр"}},
-		// {tele.InlineButton{Text: "Урал.ЗОЖ-сообщества", Unique: "seturalhealth", Data: "зож"}},
 	}
 
 	timetableBtn [][]tele.InlineButton = [][]tele.InlineButton{{tele.InlineButton{Text: "Посмотреть расписание", Unique: "seetimetable"}}}
 
 	dayInfoMap map[string]dayInfo = map[string]dayInfo{
-		"31.07.2022": {photo: &tele.Photo{File: tele.FromDisk("./img/1.jpg")}, timetableName: "смена1_день2"},
 		"01.08.2022": {photo: &tele.Photo{File: tele.FromDisk("./img/1.jpg")}, timetableName: "смена1_день1"},
 		"02.08.2022": {photo: &tele.Photo{File: tele.FromDisk("./img/2.jpg")}, timetableName: "смена1_день2"},
 		"03.08.2022": {photo: &tele.Photo{File: tele.FromDisk("./img/3.jpg")}, timetableName: "смена1_день3"},
 		"04.08.2022": {photo: &tele.Photo{File: tele.FromDisk("./img/4.jpg")}, timetableName: "смена1_день4"},
 		"05.08.2022": {photo: &tele.Photo{File: tele.FromDisk("./img/5.jpg")}, timetableName: "смена1_день5"},
-		"06.08.2022": {photo: &tele.Photo{File: tele.FromDisk("./img/6.jpg")}, timetableName: "смена1_день6"},
-		"08.08.2022": {photo: &tele.Photo{File: tele.FromDisk("./img/1.jpg")}, timetableName: "смена2_день1"},
-		"09.08.2022": {photo: &tele.Photo{File: tele.FromDisk("./img/2.jpg")}, timetableName: "смена2_день2"},
-		"10.08.2022": {photo: &tele.Photo{File: tele.FromDisk("./img/3.jpg")}, timetableName: "смена2_день3"},
-		"11.08.2022": {photo: &tele.Photo{File: tele.FromDisk("./img/4.jpg")}, timetableName: "смена2_день4"},
-		"12.08.2022": {photo: &tele.Photo{File: tele.FromDisk("./img/5.jpg")}, timetableName: "смена2_день5"},
-		"13.08.2022": {photo: &tele.Photo{File: tele.FromDisk("./img/6.jpg")}, timetableName: "смена2_день6"},
+		"06.08.2022": {photo: &tele.Photo{File: tele.FromDisk("./img/1.jpg")}, timetableName: "смена2_день1"},
+		"07.08.2022": {photo: &tele.Photo{File: tele.FromDisk("./img/2.jpg")}, timetableName: "смена2_день2"},
+		"08.08.2022": {photo: &tele.Photo{File: tele.FromDisk("./img/3.jpg")}, timetableName: "смена2_день3"},
+		"09.08.2022": {photo: &tele.Photo{File: tele.FromDisk("./img/4.jpg")}, timetableName: "смена2_день4"},
+		"10.08.2022": {photo: &tele.Photo{File: tele.FromDisk("./img/5.jpg")}, timetableName: "смена2_день5"},
 	}
 
 	setProgramInlineMarkup = &tele.ReplyMarkup{InlineKeyboard: setProgramBtns}
@@ -102,12 +97,17 @@ func timetableHandlerFactory(ttw *tt.Wrapper) tele.HandlerFunc {
 
 		}
 
+		lastEventIdx := len(sendableMessages)
 		lastEventOrder, _ := strconv.Atoi(currentTimetable[len(currentTimetable)-1].Order)
 
 		c.Send(dayInfoMap[currentDateString].photo, tele.ModeHTML)
 
 		for i := 1; i <= lastEventOrder; i++ {
-			c.Send(sendableMessages[i], tele.ModeHTML)
+			if i == lastEventIdx {
+				return c.Send(sendableMessages[i], tele.ModeHTML)
+			} else {
+				c.Send(sendableMessages[i], tele.ModeHTML)
+			}
 		}
 
 		return c.Send("")

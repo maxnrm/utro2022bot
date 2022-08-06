@@ -26,17 +26,22 @@ func ping(c *gin.Context) {
 func timetableHandlerFactory(ttw *tt.Wrapper) gin.HandlerFunc {
 	return func(c *gin.Context) {
 		var compactBody *bytes.Buffer = new(bytes.Buffer)
-		body, _ := ioutil.ReadAll(c.Request.Body)
+		body, err := ioutil.ReadAll(c.Request.Body)
 		json.Compact(compactBody, body)
 
-		err := json.Unmarshal(compactBody.Bytes(), &ttw)
+		dbHandler.AddTimetable(string(compactBody.Bytes()))
+
 		if err == nil {
 			c.Status(http.StatusNoContent)
+			ttwt := tt.New()
+			for i := range ttw.Timetables {
+				ttw.Timetables[i] = tt.Timetable{}
+			}
+			for i, v := range ttwt.Timetables {
+				ttw.Timetables[i] = v
+			}
 		} else {
 			println(err.Error())
 		}
-		ttw.FormatSelf()
-
-		dbHandler.AddTimetable(string(compactBody.Bytes()))
 	}
 }
