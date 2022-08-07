@@ -97,12 +97,18 @@ func timetableHandlerFactory(ttw *tt.Wrapper) tele.HandlerFunc {
 
 		}
 
-		lastEventIdx := len(sendableMessages) + 1
 		// lastEventOrder, _ := strconv.Atoi(currentTimetable[len(currentTimetable)-1].Order)
 
 		c.Send(dayInfoMap[currentDateString].photo, tele.ModeHTML)
 
-		for i, v := range sendableMessages {
+		sendableMessagesSlice := make([]string, 0, len(sendableMessages))
+
+		for _, v := range sendableMessages {
+			sendableMessagesSlice = append(sendableMessagesSlice, v)
+		}
+
+		lastEventIdx := len(sendableMessagesSlice) - 1
+		for i, v := range sendableMessagesSlice {
 			if i == lastEventIdx {
 				return c.Send(v, tele.ModeHTML)
 			} else {
