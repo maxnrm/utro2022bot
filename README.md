@@ -3,9 +3,9 @@
 - [x] Some events shown only for specific group
 - [x] Register bot subs to db (SQLite?)
 - [x] Register sub group to db
-- [ ] Show timetable only for current date
-- [ ] Group events by order
-- [ ] Send pics before timetable
+- [x] Show timetable only for current date
+- [x] Group events by order
+- [x] Send pics before timetable
 
 # Telegram bot API docs
 
